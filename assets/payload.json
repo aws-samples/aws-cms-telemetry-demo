@@ -1,0 +1,61 @@
+{
+    "MessageId": "{$VIN}-{$TIMESTAMP}",
+    "SimulationId": "{$SimID}",
+    "CreationTimeStamp": "{$TIMESTAMP}",
+    "SendTimeStamp": "{$TIMESTAMP}",
+    "VIN": "{$VIN}",
+    "TripId": "{$TripID}",
+    "DriverID": "",
+    "GeoLocation": {
+      "Latitude": 30.90803207226497,
+      "Longitude": 30.90803207226497,
+      "Altitude": 0,
+      "Heading": 159.90803207226497,
+      "Speed": 103.10882016931925
+    },
+    "Communications": {
+      "GSM": {
+        "Satelites": "",
+        "Fix": "",
+        "NetworkType": "",
+        "MNC": "",
+        "MCC": "",
+        "LAC": "",
+        "CID": ""
+      },
+      "WiFi": {
+        "NetworkID ": ""
+      },
+      "Wired": {
+        "NetworkID ": ""
+      }
+    },
+    "Acceleration": {
+      "MaxLongitudinal": {
+        "Axis": 0,
+        "Value": -0.37493163447162203
+      },
+      "MaxLateral": {
+        "Axis": 0,
+        "Value": -0.37493163447162203
+      }
+    },
+    "Throttle": {
+      "Max": 11.693368304181401,
+      "Average": 0
+    },
+    "Speed": {
+      "Max": 53.10882016931925,
+      "Average": 23
+    },
+    "Odometer": {
+      "Metres": 67244.36788468927,
+      "TicksFL": 0,
+      "TicksFR": 0,
+      "TicksRL": 0,
+      "TicksRR": 0
+    },
+    "Fuel": 37.47549257669135,
+    "Name": "CRtdESVEf",
+    "OilTemp": 198.52831665785095
+  }

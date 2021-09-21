@@ -1,0 +1,44 @@
+{
+    "Parameters": {
+        "SerialNumber": {
+            "Type": "String"
+        },
+        "ModelType": {
+            "Type": "String"
+        },
+        "AWS::IoT::Certificate::Id": {
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "certificate": {
+            "Properties": {
+                "CertificateId": {
+                    "Ref": "AWS::IoT::Certificate::Id"
+                },
+                "Status": "Active"
+            },
+            "Type": "AWS::IoT::Certificate"
+        },
+        "policy": {
+            "Properties": {
+              "PolicyName": "CvraTcuDevicePolicy"
+            },
+            "Type": "AWS::IoT::Policy"
+          },
+        "thing": {
+            "OverrideSettings": {
+                "AttributePayload": "MERGE",
+                "ThingGroups": "DO_NOTHING",
+                "ThingTypeName": "REPLACE"
+            },
+            "Properties": {
+                "ThingGroups": [],
+                "ThingName": {
+                    "Ref": "SerialNumber"
+                }
+            },
+            "Type": "AWS::IoT::Thing"
+        }
+    }
+}
