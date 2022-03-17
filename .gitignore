@@ -1,0 +1,3 @@
+*.crt
+__pycache__/*
+*.key

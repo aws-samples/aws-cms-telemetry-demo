@@ -21,8 +21,12 @@ class payloadHandler():
         self.topic_name = self.config_parameters['TOPIC_NAME']
         self.trips_topic_name = self.config_parameters['TRIP_TOPIC_NAME']
         self.dtc_topic_name = self.config_parameters['DTC_TOPIC_NAME']
+        self.misc_topic_name = self.config_parameters['MISC_TOPIC_NAME']
         self.csv_location = self.config_parameters['CSV_LOCATION']
+        self.misc_csv_location = self.config_parameters['MISC_CSV_LOCATION']
         self.payload_location = self.config_parameters['PAYLOAD_LOCATION']
+        
+        self.payload_misc_location = self.config_parameters['MISC_PAYLOAD_LOCATION']
         self.trips_payload_location = self.config_parameters['TRIP_PAYLOAD_LOCATION']
         self.dtc_payload_location = self.config_parameters['DTC_PAYLOAD_LOCATION']
         
@@ -69,7 +73,14 @@ class payloadHandler():
             topic=dtc_topic,
             payload=payload,
             qos=mqtt.QoS.AT_LEAST_ONCE)
-        
+
+    def publishMiscPayload(self, mqttclient, payload, vin):
+        vehicle_topic = self.misc_topic_name.format(deviceid=vin)
+        mqttclient.publish(
+            topic=vehicle_topic,
+            payload=payload,
+            qos=mqtt.QoS.AT_LEAST_ONCE)
+
     def getPayload(self, coords, tripId, vin):
         with open(self.payload_location) as f:
             template = json.load(f)
@@ -86,15 +97,43 @@ class payloadHandler():
 
         return json.dumps(template)
     
+    def getMiscPayload(self, i, vin, ts, avg_speed, maxspeed, tripId):
+        with open(self.payload_misc_location) as f:
+            template = json.load(f)
+        
+        ##ts = str(self.getTimestampMS())
+        template["messageId"] = vin + '-' + ts
+        template["simulationid"] = tripId
+        template["tripId"] = tripId
+        template["creationtimestamp"] = ts
+        template["sendtimestamp"] = ts
+        template["geolocation"]["latitude"] = i.x_pos/1000
+        template["geolocation"]["longitude"] = i.y_pos/1000
+        template["geolocation"]["location"] = [ i.y_pos/1000, i.x_pos/1000]
+        template["geolocation"]["speed"] = i.speed_mph
+        template["speed"]["average"] = avg_speed
+        template["speed"]["max"] = maxspeed
+        template["vin"] = vin
+        template["odometer"]["metres"] = i.odometer
+        template["batterycrankingvoltage"] = i.batt_current
+        template["devicevoltage"] = i.remaining
+        template["stateofcharge"] = i.batt_soc
+        template["ignition"] = 1
+        template["tires"]["pressure_front_left"] = i.tires_fl
+        template["tires"]["pressure_front_right"] = i.tires_fr
+        template["tires"]["pressure_rear_left"] = i.tires_rl
+        template["tires"]["pressure_rear_right"] = i.tires_rr
+
+        return json.dumps(template)
+        
     def getTripPayload(self, startTime, startCoords, endCoords, tripId, vin):
         with open(self.trips_payload_location) as f:
             template = json.load(f)
         
-        ts = str(self.getTimestampMS())
-        template["creationtimestamp"] = ts        
+        template["creationtimestamp"] = startTime        
         template["vin"] = vin
         template["tripid"] = tripId
-        template["sendtimestamp"] = ts
+        template["sendtimestamp"] = startTime
         
         template["tripsummary"]["endlocation"]["latitude"] = endCoords.x
         template["tripsummary"]["endlocation"]["longitude"] = endCoords.y
@@ -105,6 +144,25 @@ class payloadHandler():
         template["tripsummary"]["starttime"] = startTime
         return json.dumps(template)
     
+    def getTripPayload2(self, startTime, startCoords_lat, startCoords_long, endCoords_lat, endCoords_long, avg_speed, max_speed, tripId, vin):
+        with open(self.trips_payload_location) as f:
+            template = json.load(f)
+        
+        ts = str(self.getTimestampMS())
+        template["creationtimestamp"] = ts        
+        template["vin"] = vin
+        template["tripid"] = tripId
+        template["sendtimestamp"] = ts
+        
+        template["tripsummary"]["endlocation"]["latitude"] = endCoords_lat
+        template["tripsummary"]["endlocation"]["longitude"] = endCoords_long
+
+        template["tripsummary"]["startlocation"]["latitude"] = startCoords_lat
+        template["tripsummary"]["startlocation"]["longitude"] = startCoords_long
+
+        template["tripsummary"]["starttime"] = startTime
+        return json.dumps(template)
+
     def getDTCPayload(self, dtc, vin):
         with open(self.dtc_payload_location) as f:
             template = json.load(f)
@@ -178,6 +236,17 @@ class payloadHandler():
             reader = csv.reader(csvfile,delimiter=",")
             for row in reader:
                 a_list.append(coords(float(row[1]), float(row[0])))
+                    
+        return a_list
+
+    def generateLatLongFromMiscCSV(self):
+        telemetry = namedtuple("telemetry", ['time', 'torque','motor_torque','accel','decel','speed_mph','batt_soc','batt_current','x_pos','y_pos','odometer', 'remaining', 'tires_fl', 'tires_fr', 'tires_rr', 'tires_rl'])
+        a_list = []
+        with open(self.misc_csv_location) as csvfile:
+            reader = csv.reader(csvfile,delimiter=",")
+            for row in reader:
+                c = telemetry(float(row[0]),float(row[1]),float(row[2]),float(row[3]),float(row[4]),float(row[5]),float(row[6]),float(row[7]),float(row[8]),float(row[9]), float(row[10]), float(row[11]), float(row[12]), float(row[13]), float(row[14]), float(row[15]))
+                a_list.append(c)
                     
         return a_list
 
