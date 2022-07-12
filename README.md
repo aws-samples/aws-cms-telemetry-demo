@@ -2,9 +2,55 @@
 
 This repo contains several scripts necessary to automate the creation of devices in Connected Mobility Solution
 
-For example a script to register a single vehicle:
+
+# Requirements
+
+1. The [AWS Connected Mobility Solution](https://github.com/aws-solutions/aws-connected-mobility-solution) was deployed successfully.
+
+2. An AWS CLI profile is setup that has administrator access to the account where CMS is deployed.  This account will be referenced in the script parameters as "profile"
+
+3. A valid VIN will be used as the AWS IoT Core Thing Name and subsequent simulations
+
+Note: If you see "The security token included in the request is invalid" error for CreateRole, make sure your security credentials are properly configured for the IAM user that was created and you are not using the root/default credentials.
+
+# Credentials
+
+Before you can deploy an application, be sure you have credentials configured. If you have previously configured your machine to run boto3 (the AWS SDK for Python) or the AWS CLI then you can skip this section. If you used Cloud9 as a deployment mechanism, you can use the default profile.
+
+If this is your first time configuring credentials for AWS you can follow these steps to quickly get started:
+
+$ mkdir ~/.aws
+$ cat >> ~/.aws/config
+[default]
+aws_access_key_id=YOUR_ACCESS_KEY_HERE
+aws_secret_access_key=YOUR_SECRET_ACCESS_KEY
+region=YOUR_REGION (such as us-west-2, us-west-1, etc)
+
+If you want more information on all the supported methods for configuring credentials, see the boto3 docs.
+
+# Setup your environment
+
+1. Clone this repo to your local machine or Cloud9 environement
+
+```
+git clone https://github.com/aws-samples/aws-cms-telemetry-demo.git
+```
+
+2. Install the requirements.txt to install the prequresits.
+
+```
+cd aws-cms-telemetry-demo/
+pip3 install -r requirements.txt
+```
+
+# Overview
+
+The setupSingleVehicle.py will perform all the necessary steps to create a single vehicle in CMS.  The script uses the CloudFormation template exports to build the necessary API endpoints, get the necessary certificateIds and user credentials needed to make changes.
+
+Run the following script to register a single vehicle:
+
 ```bash
-./setupSingleVehicle.py --profile=givenand-cms --stackName=cms-dev1 --VIN=LSH14J4C4LA046511 --FirstName=Test --LastName=User --Username=testCMSUser1 --Password=Testing1234 --CDFstackName cdf-core-development
+./setupSingleVehicle.py --profile=default --stackName=cms-development --VIN=LSH14J4C4LA046511 --FirstName=CMS --LastName=User --Username=testCMSUser1 --Password=Testing1234 --CDFstackName cdf-core-development
 ```
 
 | parameter      | short | description                                                           |
@@ -19,40 +65,6 @@ For example a script to register a single vehicle:
 | --Password     | -pwd  | the admin password generated during setup (CMS confirmation mail)     |
 | --SkipSetupProvisioningTemplates     | -skip  | this will skip setting up provisioning templates if you want to setup multiple devices (bool)     |
 | --GenerateCSR     | -csr  | this will generate a csr/private key on the device rather than allow IoT Core to generate     |
-
-# Requirements
-
-1. The CMS CF was deployed successfully, please follow the onboarding instructions
-
-```
-./infrastructure/deploy-core.bash -e cmsdev2 -b givenand-cms2-s3 -p givenand-kp-cms2 -R us-west-2 -P givenand-cms -B  -y s3://givenand-cms2-s3/template-snippets/ -i 0.0.0.0/0 
-
-./infrastructure/deploy.bash -b givenand-cms2-s3 -h givenand@amazon.com -B -R us-west-2 -K givenand-cms -e cmsdev2 -P givenand-cms -p givenand-kp-cms2
-```
-2. An AWS CLI profile is setup that has administrator access to the account where CMS is deployed.  This account will be referenced in the script parameters as "profile"
-
-3. A valid VIN will be used as the thing name and subsequent simulations
-
-Note: If you see "The security token included in the request is invalid" error for CreateRole, make sure your security credentials are properly configured for the IAM user that was created and you are not using the root/default credentials.
-
-# Credentials
-
-Before you can deploy an application, be sure you have credentials configured. If you have previously configured your machine to run boto3 (the AWS SDK for Python) or the AWS CLI then you can skip this section.
-
-If this is your first time configuring credentials for AWS you can follow these steps to quickly get started:
-
-$ mkdir ~/.aws
-$ cat >> ~/.aws/config
-[default]
-aws_access_key_id=YOUR_ACCESS_KEY_HERE
-aws_secret_access_key=YOUR_SECRET_ACCESS_KEY
-region=YOUR_REGION (such as us-west-2, us-west-1, etc)
-
-If you want more information on all the supported methods for configuring credentials, see the boto3 docs.
-
-# Overview
-
-The setupSingleVehicle.py will perform all the necessary steps to create a single vehicle in CMS.  The script uses the CF template exports to build the necessary API endpoints, get the necessary certificateIds and user credentials needed to make changes.
 
 1. The script will first make modifications to the Cognito User Pool created by default by the CMS CF template.  This will allow for automated creation of users and authentication, rather than a manual method via the Cognito front-end
 
@@ -108,7 +120,6 @@ To create a CSV of lat/long coordinates to create a proper simulation of a vehic
     6. Click on the 'Untitled Map' dot menu, and select 'Export to KML/KMZ'
     7. Select the dropdown and select just the route directions and select download.
     8. Find the Placemark/coordinates within the markup language and copy that section (without the tags) into your latLong.csv
-
 
 
 ## Security
