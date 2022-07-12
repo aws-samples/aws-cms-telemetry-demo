@@ -23,4 +23,3 @@ virtualenv==20.3.0
 virtualenv-clone==0.5.4
 virtualenvwrapper==4.8.4
 zipp==3.4.0
-pytOpenSSL=22.0.0
